@@ -1,0 +1,36 @@
+import React from "react";
+
+async function getData(code: string) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/links/${code}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("not found");
+  return res.json();
+}
+
+export default async function Page({ params }: { params: { code: string } }) {
+  let data: any = null;
+  try {
+    data = await getData(params.code);
+  } catch (e) {
+    return (
+      <main style={{ padding: 24, fontFamily: "Arial, sans-serif" }}>
+        <h2>Not found</h2>
+        <p>Code: {params.code}</p>
+      </main>
+    );
+  }
+
+  return (
+    <main style={{ padding: 24, fontFamily: "Arial, sans-serif" }}>
+      <h1>Stats for {data.code}</h1>
+      <p>
+        <strong>Original URL:</strong> <a href={data.url} target="_blank" rel="noreferrer">{data.url}</a>
+      </p>
+      <p><strong>Clicks:</strong> {data.clicks}</p>
+      <p><strong>Last Clicked:</strong> {data.last_clicked ?? "Never"}</p>
+      <p><strong>Created:</strong> {new Date(data.created_at).toLocaleString()}</p>
+      <div style={{ marginTop: 16 }}>
+        <a href={process.env.NEXT_PUBLIC_BASE_URL}>&larr; Back to dashboard</a>
+      </div>
+    </main>
+  );
+}
